@@ -2,16 +2,18 @@ import React from "react";
 import Layout from "../components/Layout";
 import styles from "../styles/Blog.module.css";
 
+// Define TypeScript interfaces for our data structure
 interface Post {
   id: number;
   title: string;
   body: string;
 }
+
 interface BlogProps {
   dataBlog: Post[];
 }
-export default function Blog(props: BlogProps) {
-  const { dataBlog } = props;
+
+export default function Blog({ dataBlog }: BlogProps) {
   return (
     <Layout pageTitle="Blog Page">
       {dataBlog.map((blog) => (
@@ -25,11 +27,27 @@ export default function Blog(props: BlogProps) {
 }
 
 export async function getServerSideProps() {
-  const res = await fetch("https://jsonplaceholder.typicode.com/posts");
-  const dataBlog = await res.json();
-  return {
-    props: {
-      dataBlog,
-    },
-  };
+  try {
+    const res = await fetch("https://jsonplaceholder.typicode.com/posts");
+    
+    if (!res.ok) {
+      throw new Error(`Failed to fetch posts: ${res.status}`);
+    }
+    
+    const dataBlog = await res.json();
+    
+    return {
+      props: {
+        dataBlog,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching blog posts:", error);
+    
+    return {
+      props: {
+        dataBlog: [],
+      },
+    };
+  }
 }
